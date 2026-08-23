@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DataPulse AI Studio - Interactive Data Science & ML Playground</title>
+  <meta name="description" content="State-of-the-art interactive exploratory data analysis, visual analytics, in-browser machine learning training, and decision boundary visualization.">
+  
+  <!-- Google Fonts & Lucide Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="brand-container">
+      <div class="brand-logo">
+        <i data-lucide="activity"></i>
+      </div>
+      <div>
+        <h1 class="brand-title">DataPulse AI</h1>
+      </div>
+      <span class="brand-badge">PRO STUDIO</span>
+    </div>
+
+    <nav class="nav-tabs" role="tablist">
+      <button class="tab-btn active" data-tab="tab-explorer" id="nav-explorer">
+        <i data-lucide="table"></i> Explorer & Profiler
+      </button>
+      <button class="tab-btn" data-tab="tab-visuals" id="nav-visuals">
+        <i data-lucide="bar-chart-2"></i> Visual Analytics
+      </button>
+      <button class="tab-btn" data-tab="tab-ml" id="nav-ml">
+        <i data-lucide="cpu"></i> ML & Boundary Lab
+      </button>
+      <button class="tab-btn" data-tab="tab-insights" id="nav-insights">
+        <i data-lucide="sparkles"></i> AI Insights & Export
+      </button>
+    </nav>
+
+    <div class="header-actions">
+      <button class="btn btn-secondary btn-sm" id="btn-synthetic-modal">
+        <i data-lucide="wand-2"></i> Synthetic Data
+      </button>
+      <button class="btn btn-primary btn-sm" id="btn-upload-modal">
+        <i data-lucide="upload-cloud"></i> Upload CSV
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Wrapper -->
+  <main class="main-wrapper">
+
+    <!-- Dataset Selector Bar -->
+    <section class="dataset-bar" id="dataset-selector-bar">
+      <!-- Injected dynamically via app.js -->
+    </section>
+
+    <!-- ================= TAB 1: DATA EXPLORER & PROFILER ================= -->
+    <section class="tab-pane active" id="tab-explorer">
+      <!-- Top Metrics Row -->
+      <div class="grid-4" style="margin-bottom: 1.5rem;">
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-label">Total Observations</span>
+            <i data-lucide="database" style="color: var(--accent-cyan);"></i>
+          </div>
+          <div class="stat-value" id="stat-row-count">0</div>
+          <div class="stat-subtext" id="stat-row-sub">Clean Records</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-label">Feature Dimensions</span>
+            <i data-lucide="columns" style="color: var(--accent-purple);"></i>
+          </div>
+          <div class="stat-value" id="stat-col-count">0</div>
+          <div class="stat-subtext" id="stat-target-name">Target: None</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-label">Data Health Score</span>
+            <i data-lucide="shield-check" style="color: var(--accent-emerald);"></i>
+          </div>
+          <div class="stat-value" id="stat-health-score" style="color: var(--accent-emerald);">100%</div>
+          <div class="stat-subtext" id="stat-health-grade">Grade: A+ (Production Ready)</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-label">Task Category</span>
+            <i data-lucide="tag" style="color: var(--accent-amber);"></i>
+          </div>
+          <div class="stat-value" id="stat-task-type" style="font-size: 1.35rem; color: var(--accent-amber);">Classification</div>
+          <div class="stat-subtext" id="stat-type-sub">Supervised Modeling</div>
+        </div>
+      </div>
+
+      <!-- Main Profiler Grid -->
+      <div class="grid-1-2" style="margin-bottom: 1.5rem;">
+        <!-- Data Quality Breakdown -->
+        <div class="glass-card">
+          <div class="glass-card-header">
+            <div class="card-title-group">
+              <div class="card-title-icon"><i data-lucide="clipboard-check"></i></div>
+              <h3 class="card-title">Quality & Health Audit</h3>
+            </div>
+          </div>
+          <div id="health-insights-list" style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- Injected dynamically -->
+          </div>
+        </div>
+
+        <!-- Descriptive Statistics Overview -->
+        <div class="glass-card">
+          <div class="glass-card-header">
+            <div class="card-title-group">
+              <div class="card-title-icon"><i data-lucide="sliders"></i></div>
+              <h3 class="card-title">Feature Profiling & Statistical Summary</h3>
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="custom-table" id="summary-stats-table">
+              <thead>
+                <tr>
+                  <th>Feature</th>
+                  <th>Type</th>
+                  <th>Mean / Mode</th>
+                  <th>Std Dev</th>
+                  <th>Min - Max</th>
+                  <th>IQR</th>
+                  <th>Skewness</th>
+                  <th>Outliers</th>
+                </tr>
+              </thead>
+              <tbody id="summary-stats-body">
+                <!-- Injected dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Raw Data Table -->
+      <div class="glass-card">
+        <div class="glass-card-header">
+          <div class="card-title-group">
+            <div class="card-title-icon"><i data-lucide="table"></i></div>
+            <h3 class="card-title">Interactive Data Grid Viewer</h3>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" class="form-input" id="table-search-input" placeholder="Search records..." style="width: 220px; padding: 0.4rem 0.8rem; font-size: 0.82rem;">
+            <button class="btn btn-secondary btn-sm" id="btn-export-csv"><i data-lucide="download"></i> Export CSV</button>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="custom-table" id="raw-data-table">
+            <thead id="raw-table-head"></thead>
+            <tbody id="raw-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 2: VISUAL ANALYTICS ================= -->
+    <section class="tab-pane" id="tab-visuals">
+      <div class="grid-2" style="margin-bottom: 1.5rem;">
+        <!-- Feature Distribution Histogram -->
+        <div class="glass-card">
+          <div class="glass-card-header">
+            <div class="card-title-group">
+              <div class="card-title-icon"><i data-lucide="bar-chart"></i></div>
+              <h3 class="card-title">Univariate Distribution & Density</h3>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <select class="form-select" id="hist-feature-select" style="width: 170px; padding: 0.35rem 0.7rem; font-size: 0.82rem;"></select>
+            </div>
+          </div>
+          <div class="chart-box">
+            <canvas id="canvas-histogram"></canvas>
+          </div>
+        </div>
+
+        <!-- 2D Scatter & Feature Relationship -->
+        <div class="glass-card">
+          <div class="glass-card-header">
+            <div class="card-title-group">
+              <div class="card-title-icon"><i data-lucide="scatter-chart"></i></div>
+              <h3 class="card-title">Bivariate Feature Interaction</h3>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <select class="form-select" id="scatter-x-select" style="width: 140px; padding: 0.35rem 0.6rem; font-size: 0.8rem;"></select>
+              <select class="form-select" id="scatter-y-select" style="width: 140px; padding: 0.35rem 0.6rem; font-size: 0.8rem;"></select>
+            </div>
+          </div>
+          <div class="chart-box">
+            <canvas id="canvas-scatter"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Correlation Heatmap & Feature Impact Matrix -->
+      <div class="glass-card">
+        <div class="glass-card-header">
+          <div class="card-title-group">
+            <div class="card-title-icon"><i data-lucide="grid"></i></div>
+            <h3 class="card-title">Pearson Feature Correlation Matrix</h3>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">
+            Hover over matrix cells to inspect pairwise collinearity
+          </div>
+        </div>
+        <div id="correlation-matrix-wrapper" class="matrix-container" style="text-align: center;">
+          <!-- Injected dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 3: MACHINE LEARNING & BOUNDARY LAB ================= -->
+    <section class="tab-pane" id="tab-ml">
+      <div class="grid-1-2" style="margin-bottom: 1.5rem;">
+        
+        <!-- ML Hyperparameter & Config Studio -->
+        <div class="glass-card">
+          <div class="glass-card-header">
+            <div class="card-title-group">
+              <div class="card-title-icon"><i data-lucide="settings"></i></div>
+              <h3 class="card-title">Model Architecture</h3>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Selected Algorithm</label>
+            <select class="form-select" id="ml-algo-select">
+              <option value="logistic_regression">Logistic Regression (Sigmoid / SGD)</option>
+              <option value="knn">K-Nearest Neighbors (KNN)</option>
+              <option value="linear_regression">Multiple Linear Regression</option>
+              <option value="kmeans">K-Means Clustering (Unsupervised)</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="group-lr">
+            <div class="form-label">
+              <span>Learning Rate (&eta;)</span>
+              <span class="form-value-badge" id="val-lr">0.10</span>
+            </div>
+            <input type="range" id="slider-lr" min="0.01" max="0.5" step="0.01" value="0.10">
+          </div>
+
+          <div class="form-group" id="group-epochs">
+            <div class="form-label">
+              <span>Training Epochs</span>
+              <span class="form-value-badge" id="val-epochs">80</span>
+            </div>
+            <input type="range" id="slider-epochs" min="20" max="200" step="10" value="80">
+          </div>
+
+          <div class="form-group" id="group-knn-k" style="display: none;">
+            <div class="form-label">
+              <span>K-Neighbors</span>
+              <span class="form-value-badge" id="val-knn-k">3</span>
+            </div>
+            <input type="range" id="slider-knn-k" min="1" max="9" step="2" value="3">
+          </div>
+
+          <div class="form-group">
+            <div class="form-label">
+              <span>Train / Test Split Ratio</span>
+              <span class="form-value-badge" id="val-split">75% Train / 25% Test</span>
+            </div>
+            <input type="range" id="slider-split" min="50" max="90" step="5" value="75">
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+            <button class="btn btn-primary" id="btn-train-model" style="flex: 1;">
+              <i data-lucide="play"></i> Train In Browser
+            </button>
+            <button class="btn btn-secondary" id="btn-reset-ml">
+              <i data-lucide="rotate-ccw"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Training Metrics & Loss Curve -->
+        <div class="glass-card">
+          <div class="glass-card-header">
+            <div class="card-title-group">
+              <div class="card-title-icon"><i data-lucide="activity"></i></div>
+              <h3 class="card-title">Real-Time Training Convergence</h3>
+            </div>
+            <div id="ml-status-badge">
+              <span class="badge badge-cyan"><span class="pulse-indicator"></span> Ready to Train</span>
+            </div>
+          </div>
+
+          <!-- Metric Badges Row -->
+          <div class="grid-4" style="margin-bottom: 1.2rem;" id="ml-metrics-row">
+            <div class="stat-card" style="padding: 0.8rem;">
+              <div class="stat-label">Model Accuracy</div>
+              <div class="stat-value" id="val-model-acc" style="font-size: 1.4rem; color: var(--accent-emerald);">--</div>
+            </div>
+            <div class="stat-card" style="padding: 0.8rem;">
+              <div class="stat-label">Precision</div>
+              <div class="stat-value" id="val-model-precision" style="font-size: 1.4rem; color: var(--accent-cyan);">--</div>
+            </div>
+            <div class="stat-card" style="padding: 0.8rem;">
+              <div class="stat-label">Recall</div>
+              <div class="stat-value" id="val-model-recall" style="font-size: 1.4rem; color: var(--accent-purple);">--</div>
+            </div>
+            <div class="stat-card" style="padding: 0.8rem;">
+              <div class="stat-label">F1-Score</div>
+              <div class="stat-value" id="val-model-f1" style="font-size: 1.4rem; color: var(--accent-amber);">--</div>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <canvas id="canvas-training-curve"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Decision Boundary & What-If Simulator Grid -->
+      <div class="grid-2" style="margin-bottom: 1.5rem;">
+        
+        <!-- 2D Decision Boundary Canvas Visualizer -->
+        <div class="glass-card">
+          <div class="glass-card-header">
+            <div class="card-title-group">
+              <div class="card-title-icon"><i data-lucide="layers"></i></div>
+              <h3 class="card-title">Dynamic 2D Decision Boundary</h3>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <select class="form-select" id="boundary-x-select" style="width: 130px; padding: 0.3rem 0.5rem; font-size: 0.78rem;"></select>
+              <select class="form-select" id="boundary-y-select" style="width: 130px; padding: 0.3rem 0.5rem; font-size: 0.78rem;"></select>
+            </div>
+          </div>
+          <canvas id="canvas-decision-boundary" width="560" height="320" class="canvas-boundary"></canvas>
+          <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.78rem; color: var(--text-muted);">
+            <span><span style="color: var(--accent-cyan); font-weight: 600;">● Cyan:</span> Class 0 Region</span>
+            <span><span style="color: var(--accent-pink); font-weight: 600;">● Coral:</span> Class 1 Region</span>
+          </div>
+        </div>
+
+        <!-- What-If Real-Time Inference Sandbox -->
+        <div class="glass-card">
+          <div class="glass-card-header">
+            <div class="card-title-group">
+              <div class="card-title-icon"><i data-lucide="sliders-horizontal"></i></div>
+              <h3 class="card-title">Live "What-If" Inference Simulator</h3>
+            </div>
+          </div>
+
+          <div id="whatif-sliders-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-height: 180px; overflow-y: auto; padding-right: 6px;">
+            <!-- Injected dynamically -->
+          </div>
+
+          <!-- Prediction Result Card -->
+          <div style="background: rgba(13, 18, 36, 0.95); border: 1px solid var(--accent-cyan); border-radius: var(--radius-sm); padding: 1rem; margin-top: 1rem; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Predicted Outcome</div>
+              <div id="whatif-pred-value" style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; color: var(--accent-cyan);">--</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Model Confidence</div>
+              <div id="whatif-pred-confidence" style="font-family: var(--font-mono); font-size: 1.3rem; font-weight: 600; color: var(--accent-emerald);">--%</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= TAB 4: AUTOMATED INSIGHTS & EXPORT ================= -->
+    <section class="tab-pane" id="tab-insights">
+      <div class="grid-2-1" style="margin-bottom: 1.5rem;">
+        
+        <!-- Automated AI Findings & Takeaways -->
+        <div class="glass-card">
+          <div class="glass-card-header">
+            <div class="card-title-group">
+              <div class="card-title-icon"><i data-lucide="cpu"></i></div>
+              <h3 class="card-title">Automated AI Data Science Executive Summary</h3>
+            </div>
+          </div>
+
+          <div id="executive-summary-content" style="display: flex; flex-direction: column; gap: 14px; font-size: 0.92rem; color: #cbd5e1;">
+            <!-- Injected dynamically -->
+          </div>
+        </div>
+
+        <!-- Export & Action Hub -->
+        <div class="glass-card">
+          <div class="glass-card-header">
+            <div class="card-title-group">
+              <div class="card-title-icon"><i data-lucide="share-2"></i></div>
+              <h3 class="card-title">Export Artifacts</h3>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <button class="btn btn-primary" id="btn-export-full-report" style="width: 100%;">
+              <i data-lucide="file-text"></i> Print / PDF Full Report
+            </button>
+            <button class="btn btn-secondary" id="btn-export-weights" style="width: 100%;">
+              <i data-lucide="code"></i> Download Model Weights (JSON)
+            </button>
+            <button class="btn btn-secondary" id="btn-export-cleaned-csv" style="width: 100%;">
+              <i data-lucide="download-cloud"></i> Export Cleaned CSV
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Upload Modal -->
+  <div id="modal-upload" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+    <div class="glass-card" style="width: 90%; max-width: 520px; background: #0d1224;">
+      <div class="glass-card-header">
+        <h3 class="card-title">Upload Custom CSV Dataset</h3>
+        <button class="btn btn-secondary btn-sm" id="btn-close-upload"><i data-lucide="x"></i></button>
+      </div>
+      <div class="upload-dropzone" id="csv-dropzone">
+        <i data-lucide="upload-cloud"></i>
+        <h4>Drag & Drop your CSV file here</h4>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">or click to browse from your device</p>
+        <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+      </div>
+      <div style="margin-top: 1rem; font-size: 0.78rem; color: var(--text-dim);">
+        Supports numerical & categorical features. Auto-infers regression vs classification targets.
+      </div>
+    </div>
+  </div>
+
+  <!-- Synthetic Generator Modal -->
+  <div id="modal-synthetic" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+    <div class="glass-card" style="width: 90%; max-width: 520px; background: #0d1224;">
+      <div class="glass-card-header">
+        <h3 class="card-title">Generate Synthetic 2D Distribution</h3>
+        <button class="btn btn-secondary btn-sm" id="btn-close-synthetic"><i data-lucide="x"></i></button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Distribution Pattern</label>
+        <select class="form-select" id="synthetic-pattern">
+          <option value="blobs">Gaussian Blobs (Separable Clusters)</option>
+          <option value="moons">Non-Linear Interlocking Moons</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">
+          <span>Sample Size (Records)</span>
+          <span class="form-value-badge" id="val-synth-count">80</span>
+        </div>
+        <input type="range" id="synth-count-slider" min="30" max="150" step="10" value="80">
+      </div>
+      <button class="btn btn-primary" id="btn-generate-synthetic" style="width: 100%; margin-top: 1rem;">
+        <i data-lucide="sparkles"></i> Generate & Load Dataset
+      </button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/datasets.js"></script>
+  <script src="js/statsEngine.js"></script>
+  <script src="js/mlEngine.js"></script>
+  <script src="js/chartManager.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
